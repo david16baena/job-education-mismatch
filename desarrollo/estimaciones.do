@@ -1,9 +1,10 @@
 clear all
 set more off
-cd "C:\Users\david baena\Desktop\Mismatch\nuevos_datos"
+cd "C:\Users\david\Desktop\proyectos\job-education-mismatch\data"
 
 import delimited using "stata.csv"
 
+cd "C:\Users\david\Desktop\proyectos\job-education-mismatch\desarrollo"
 *Últimos detalles
 foreach var of varlist _all {
 	capture confirm string variable `var'
@@ -134,22 +135,26 @@ gen educ = 1
 replace educ = 2 if mideduc == 1
 replace educ = 3 if overeduc == 1
 set more off
-cmp (acc = celda1 vivienda1 parquea_bici_den parquea_bici dist_parqueadero metro_den dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+cmp (acc = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
 	 edad04 edad59 edad1015 edad1619 casado genero ///
 	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno /// 
 	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
-	(accesiblidad = celda1 vivienda1 parquea_bici_den parquea_bici dist_parqueadero metro_den  dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	(accesiblidad = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
 	 edad04 edad59 edad1015 edad1619 casado genero ///
 	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
 	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
 	(educ = accesiblidad acc edad04 edad59 edad1015 edad1619 casado genero ///
 	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
 	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity, iia), ///
-	 ind($cmp_cont $cmp_cont $cmp_mprobit) 
+	 ind($cmp_cont $cmp_cont $cmp_mprobit) vce(robust)
 
 	 *SUBEDUCADOS
 margins, dydx(accesiblidad) expression(binormal( (predict(eq(#3))-predict(eq(#4)))/sqrt(2), (predict(eq(#3))-predict(eq(#5)))/sqrt(2), .5)) force
 margins, dydx(acc) expression(binormal( (predict(eq(#3))-predict(eq(#4)))/sqrt(2), (predict(eq(#3))-predict(eq(#5)))/sqrt(2), .5)) force
+
+	 *EDUCADOS
+margins, dydx(accesiblidad) expression(binormal( (predict(eq(#4))-predict(eq(#3)))/sqrt(2), (predict(eq(#4))-predict(eq(#5)))/sqrt(2), .5)) force
+margins, dydx(acc) expression(binormal( (predict(eq(#4))-predict(eq(#3)))/sqrt(2), (predict(eq(#4))-predict(eq(#5)))/sqrt(2), .5)) force
 	 
 	 *SOBREDUCADOS
 margins, dydx(accesiblidad) expression(binormal( (predict(eq(#5))-predict(eq(#3)))/sqrt(2), (predict(eq(#5))-predict(eq(#4)))/sqrt(2), .5)) force
