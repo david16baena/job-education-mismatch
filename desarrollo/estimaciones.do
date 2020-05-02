@@ -111,25 +111,7 @@ replace celda1 = 1 if celda_propia == "TRUE"
 gen vivienda1 = 0
 replace vivienda1 = 1 if desc_vivienda_es == "Alquilada"
 
-set more off
-cmp (acc = celda1 vivienda1 parquea_bici_den parquea_bici dist_parqueadero metro_den dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
-	 edad04 edad59 edad1015 edad1619 casado genero ///
-	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno /// 
-	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
-	(accesiblidad = celda1 vivienda1 parquea_bici_den parquea_bici dist_parqueadero metro_den  dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
-	 edad04 edad59 edad1015 edad1619 casado genero ///
-	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
-	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
-	(undereduc = accesiblidad acc edad04 edad59 edad1015 edad1619 casado genero ///
-	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
-	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
-	(overeduc = accesiblidad acc edad04 edad59 edad1015 edad1619 casado genero ///
-	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
-	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity), ///
-	 ind($cmp_cont $cmp_cont $cmp_probit $cmp_probit) 
-
-	 
-outreg2 using "regresion_cmp.xls"
+*export delimited using "C:\Users\david\Desktop\proyectos\job-education-mismatch\data\datos_para_agrupar.csv", replace
 
 gen educ = 1
 replace educ = 2 if mideduc == 1
@@ -147,17 +129,173 @@ cmp (acc = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bu
 	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
 	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity, iia), ///
 	 ind($cmp_cont $cmp_cont $cmp_mprobit) vce(robust)
+	 
+label var celda1 "Privately owned parking lot"
+label var vivienda1 "Privately owned house"
+label var dist_parqueadero "Distance to parking lot"
+label var dist_parquea_bici "Distance to bicycle parking lot"
+label var dist_taxi "Distance to taxi stop"
+label var dist_bus "Distance to bus stop"
+label var dist_metro "Distance to ``Metro'' station"
+label var instrumento2 "Most common and newest car model"
+label var accesiblidad "Public Accessibility" 
+label var acc "Private Accessibility"
+label var edad04 "No. children aged 0-4"
+label var edad59 "No. children aged 5-9"
+label var edad1015 "No. children aged 10-15"
+label var edad1619 "No. children aged 16-19"
+label var casado "Married"
+label var genero "Male"
+label var head_household "Head of household"
+label var edad "Age"
+label var ninguno "None"
+label var primaria "Primary"
+label var novenogrado "Incomplete Secondary" 
+label var bachillerato "Secondary"
+label var educaciónnoformal "Non-formal" 
+label var tecnológico "Technologic" 
+label var técnico "Technique" 
+label var universitario "Undergraduate"
+label var posgrado "Graduate" 
+label var noresponde "Did not answered"
+
+outreg2 using "regresion_cmp.xls",label tex  eqdrop(_outcome_3_1 lnsig_1 lnsig_2 atanhrho_12 atanhrho_14 atanhrho_15 atanhrho_24 atanhrho_25) replace
 
 	 *SUBEDUCADOS
-margins, dydx(accesiblidad) expression(binormal( (predict(eq(#3))-predict(eq(#4)))/sqrt(2), (predict(eq(#3))-predict(eq(#5)))/sqrt(2), .5)) force
-margins, dydx(acc) expression(binormal( (predict(eq(#3))-predict(eq(#4)))/sqrt(2), (predict(eq(#3))-predict(eq(#5)))/sqrt(2), .5)) force
+quietly cmp (acc = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno /// 
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(accesiblidad = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(educ = accesiblidad acc edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity, iia), ///
+	 ind($cmp_cont $cmp_cont $cmp_mprobit) vce(robust)
+eststo clear 
+estpost margins, dydx(accesiblidad) expression(binormal( (predict(eq(#3))-predict(eq(#4)))/sqrt(2), (predict(eq(#3))-predict(eq(#5)))/sqrt(2), .5)) force
+eststo sub_public_ape
+quietly cmp (acc = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno /// 
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(accesiblidad = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(educ = accesiblidad acc edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity, iia), ///
+	 ind($cmp_cont $cmp_cont $cmp_mprobit) vce(robust)
+estpost margins, dydx(acc) expression(binormal( (predict(eq(#3))-predict(eq(#4)))/sqrt(2), (predict(eq(#3))-predict(eq(#5)))/sqrt(2), .5)) force
+eststo sub_private_ape
 
 	 *EDUCADOS
-margins, dydx(accesiblidad) expression(binormal( (predict(eq(#4))-predict(eq(#3)))/sqrt(2), (predict(eq(#4))-predict(eq(#5)))/sqrt(2), .5)) force
-margins, dydx(acc) expression(binormal( (predict(eq(#4))-predict(eq(#3)))/sqrt(2), (predict(eq(#4))-predict(eq(#5)))/sqrt(2), .5)) force
-	 
-	 *SOBREDUCADOS
-margins, dydx(accesiblidad) expression(binormal( (predict(eq(#5))-predict(eq(#3)))/sqrt(2), (predict(eq(#5))-predict(eq(#4)))/sqrt(2), .5)) force
-margins, dydx(acc) expression(binormal( (predict(eq(#5))-predict(eq(#3)))/sqrt(2), (predict(eq(#5))-predict(eq(#4)))/sqrt(2), .5)) force
+quietly cmp (acc = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno /// 
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(accesiblidad = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(educ = accesiblidad acc edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity, iia), ///
+	 ind($cmp_cont $cmp_cont $cmp_mprobit) vce(robust)
+estpost margins, dydx(accesiblidad) expression(binormal( (predict(eq(#4))-predict(eq(#3)))/sqrt(2), (predict(eq(#4))-predict(eq(#5)))/sqrt(2), .5)) force
+eststo just_public_ape
+quietly cmp (acc = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno /// 
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(accesiblidad = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(educ = accesiblidad acc edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity, iia), ///
+	 ind($cmp_cont $cmp_cont $cmp_mprobit) vce(robust)
+estpost margins, dydx(acc) expression(binormal( (predict(eq(#4))-predict(eq(#3)))/sqrt(2), (predict(eq(#4))-predict(eq(#5)))/sqrt(2), .5)) force
+eststo just_private_ape
 
-outreg2 using "regresion_cmp.xls"
+	 *SOBREDUCADOS
+quietly cmp (acc = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno /// 
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(accesiblidad = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(educ = accesiblidad acc edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity, iia), ///
+	 ind($cmp_cont $cmp_cont $cmp_mprobit) vce(robust)
+estpost margins, dydx(accesiblidad) expression(binormal( (predict(eq(#5))-predict(eq(#3)))/sqrt(2), (predict(eq(#5))-predict(eq(#4)))/sqrt(2), .5)) force
+eststo over_public_ape
+quietly cmp (acc = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno /// 
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(accesiblidad = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(educ = accesiblidad acc edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity, iia), ///
+	 ind($cmp_cont $cmp_cont $cmp_mprobit) vce(robust)
+estpost margins, dydx(acc) expression(binormal( (predict(eq(#5))-predict(eq(#3)))/sqrt(2), (predict(eq(#5))-predict(eq(#4)))/sqrt(2), .5)) force
+eststo over_private_ape
+
+esttab sub_public_ape just_public_ape over_public_ape sub_private_ape just_private_ape  over_private_ape using "margenes.tex", se replace ///
+label booktabs star(* 0.10 ** 0.05 *** 0.01) ///  
+title("Marginal effects from conditional mixed process model") mtitle
+
+
+*Robustness checks
+cmp (acc = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno /// 
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(accesiblidad = celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+	 edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(empleado = accesiblidad acc tasa_desempleo edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity) ///
+	(educ = accesiblidad acc edad04 edad59 edad1015 edad1619 casado genero ///
+	 head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+	 noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity, iia), ///
+	 ind($cmp_cont $cmp_cont $cmp_probit empleado*$cmp_mprobit) vce(robust)
+
+label var empleado "Employed"
+label var tasa_desempleo "Pseudo-unemployment rate"
+
+outreg2 using "robust_regresion_cmp.xls",label tex  eqdrop(_outcome_3_1 lnsig_1 lnsig_2 atanhrho_12 atanhrho_14 atanhrho_15 atanhrho_24 atanhrho_25) replace
+
+
+program bsses
+            reg acc celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+			edad04 edad59 edad1015 edad1619 casado genero ///
+			head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno /// 
+			noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity
+			capture drop acc_res
+			predict acc_res, residuals
+			reg accesiblidad celda1 vivienda1 dist_parqueadero dist_parquea_bici dist_taxi dist_bus dist_metro instrumento2 ///
+			edad04 edad59 edad1015 edad1619 casado genero ///
+			head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+			noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity
+            capture drop accesiblidad_res
+			predict accesiblidad_res, residuals
+            mlogit educ accesiblidad acc_res accesiblidad_res acc edad04 edad59 edad1015 edad1619 casado genero ///
+			head_household edad c.edad#c.edad bachillerato educaciónnoformal ninguno ///
+			noresponde novenogrado posgrado primaria técnico tecnológico universitario $amenity                      
+end program
+bootstrap, reps(1000): bsses
+margins, dydx(acc accesiblidad)
